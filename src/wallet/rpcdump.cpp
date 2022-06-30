@@ -78,8 +78,8 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
 {
     if (!EnsureWalletIsAvailable(fHelp))
         return NullUniValue;
-    
-    if (fHelp || params.size() < 1 || params.size() > 3)
+
+    if (fHelp || params.size() < 1 || params.size() > 4)
         throw runtime_error(
             "importprivkey \"milprivkey\" ( \"label\" rescan )\n"
             "\nAdds a private key (as returned by dumpprivkey) to your wallet.\n"
@@ -87,12 +87,15 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
             "1. \"milprivkey\"   (string, required) The private key (see dumpprivkey)\n"
             "2. \"label\"            (string, optional, default=\"\") An optional label\n"
             "3. rescan               (boolean, optional, default=true) Rescan the wallet for transactions\n"
+            "4. height               (numeric, optional, default=0) Specified height to start rescan\n"
             "\nNote: This call can take minutes to complete if rescan is true.\n"
             "\nExamples:\n"
             "\nDump a private key\n"
             + HelpExampleCli("dumpprivkey", "\"myaddress\"") +
             "\nImport the private key with rescan\n"
             + HelpExampleCli("importprivkey", "\"mykey\"") +
+            "\nImport the private key with rescan from specified height\n"
+            + HelpExampleCli("importprivkey", "\"mykey\" \"\" true 150000") +
             "\nImport using a label and without rescan\n"
             + HelpExampleCli("importprivkey", "\"mykey\" \"testing\" false") +
             "\nAs a JSON-RPC call\n"
@@ -145,7 +148,12 @@ UniValue importprivkey(const UniValue& params, bool fHelp)
         pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
 
         if (fRescan) {
-            pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+            if (params.size() > 3) {
+                int32_t height = params[3].get_int();
+                pwalletMain->ScanForWalletTransactions(chainActive[height], true);
+            } else {
+                pwalletMain->ScanForWalletTransactions(chainActive.Genesis(), true);
+            }
         }
     }
 
