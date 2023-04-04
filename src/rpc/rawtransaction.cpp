@@ -139,7 +139,7 @@ void TxToJSONExpanded(const CTransaction& tx, const uint256 hashBlock, UniValue&
     entry.push_back(Pair("vout", vout));
 
     if (!hashBlock.IsNull()) {
-        entry.push_back(Pair("blockhash", nHeight));
+        entry.push_back(Pair("blockhash", hashBlock.GetHex()));
 
         if (nConfirmations > 0) {
             entry.push_back(Pair("height", nHeight));
